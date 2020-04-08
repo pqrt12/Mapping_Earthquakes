@@ -5,8 +5,8 @@ console.log("working");
 //  zoom level [0 :: 18].
 let map, mapOption = 1;
 if (mapOption == 1) {
-    //  LA
-    map = L.map('mapid').setView([30.202487, -97.665533], 4);
+    //  SFO
+    map = L.map('mapid').setView([37.5, -122.5], 10);
 } else {
     // if multiple layers or a background is needed.
     map = L.map("mapid", {
@@ -15,6 +15,58 @@ if (mapOption == 1) {
     });
 }
 
+// Add GeoJSON data.
+let sanFranAirport = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "3469",
+                "name": "San Francisco International Airport",
+                "city": "San Francisco",
+                "country": "United States",
+                "faa": "SFO",
+                "icao": "KSFO",
+                "alt": "13",
+                "tz-offset": "-8",
+                "dst": "A",
+                "tz": "America/Los_Angeles"
+            },
+            "geometry": {
+                "type": "Point",
+                //  reverse order in GeoJSON. X (longitude), Y (latitude).
+                "coordinates": [-122.375, 37.61899948120117]
+            }
+        }
+    ]
+};
+
+// Grabbing our GeoJSON data.
+L.geoJSON(sanFranAirport).addTo(map);
+
+//  pointToLayer
+/*
+L.geoJson(sanFranAirport, {
+    pointToLayer: function (feature, latlng) {
+        console.log(feature);
+        return L.marker(latlng);
+            .bindPopup("<h2>Airport Code: " + feature.properties.faa + "</h2> <hr> <h4>Airport name: " + feature.properties.name + "</h4>");
+    }
+}).addTo(map);
+*/
+
+L.geoJson(sanFranAirport, {
+    onEachFeature: function (feature, layer) {
+        //        console.log(feature);
+        //        console.log(layer);
+        L.marker(feature.geometry.coordinates);
+        layer.bindPopup("<h2>Airport Code: " + feature.properties.faa + "</h2> <hr> <h4>Airport name: " + feature.properties.name + "</h4>");
+    }
+}).addTo(map);
+
+
+/*
 // Coordinates for each point to be used in the line.
 // Coordinates for each point to be used in the polyline.
 let line = [
@@ -31,6 +83,7 @@ L.polyline(line, {
     dashArray: "7 7",
     fillOpacity: 0.5
  }).addTo(map);
+*/
 
 /*
 //  Get data from cities.js
@@ -61,7 +114,7 @@ let marker = L.circleMarker([34.0522, -118.2437], {
 }).addTo(map);
 */
 // We create the tile layer that will be the background of our map.
-let streets, tileLayerOption = 1;
+let streets, tileLayerOption = 5;
 if (tileLayerOption == 1) {
     streets = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -75,9 +128,20 @@ if (tileLayerOption == 1) {
         maxZoom: 18,
         accessToken: API_KEY
     });
-} else {
-    
+} else if (tileLayerOption == 3) {
     streets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        accessToken: API_KEY
+    });
+} else if (tileLayerOption == 4) {
+    streets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/navigation-preview-night-v4/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        accessToken: API_KEY
+    });
+} else {
+    streets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
         accessToken: API_KEY
